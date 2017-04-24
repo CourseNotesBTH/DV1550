@@ -1,0 +1,69 @@
+#ifndef STUDENTFUNCTIONS_H
+#define STUDENTFUNCTIONS_H
+
+#include "functions.h"
+
+//free
+#include <stdio.h>
+//strcspn
+#include <string.h>
+//system()
+#include <stdlib.h>
+//time(NULL)
+#include <time.h>
+
+/*
+	Calls scanf and runs getchar() immediately afterwards, effectively removing the problem with
+ scanf(_s) leaving the return key in the buffer. Note, overwrites the original function.
+ 
+	...			=> take an unkown amount of arguments
+	__VA_ARGS__ => all arguments from ...
+	##			=> optional
+ */
+#define scanf(format, ...) scanf(format, ## __VA_ARGS__); getchar();
+
+/*
+	Calls fgets and removes the trailing newline usually left from pressing return.
+ 
+	The trailing newline removal function works by counting characters up until \r or \n.
+	If none are found, it stops at \0 making it resilient to strings lacking trailing newlines as well.
+	Note, overwrites the original function.
+ */
+#define fgets(str, n, stream) fgets(str, n, stream); str[strcspn(str, "\r\n")] = 0;
+
+/*
+    Calls printf as usual and then prints a newline - instead of using \n every time.
+ */
+#define printf_n(format, ...) printf(format, ## __VA_ARGS__); printf("\n");
+
+#define BUFFER_SIZE 200
+
+typedef int bool;
+enum { false, true };
+
+void printMenu();
+
+void clearScreen();
+
+void handleReadImage(Image *image);
+
+void handleSaveImage(Image *image);
+
+void handleInvertImage(Image image);
+
+void handleShiftImage(Image image);
+
+void handleFlipImage(Image* image);
+
+void handleScaleImage(Image* image);
+
+void scaleImage(Image* image, int factor);
+
+void handleZoomImage(Image* image);
+
+void handleCipher(Image* cipher);
+
+void generateImage(Image* image);
+
+
+#endif

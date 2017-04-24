@@ -1,0 +1,14 @@
+1. 
+int num1 = 1,
+    num2 = 2;
+
+float result = (float)1/2;
+
+2.
+if(x >= 15 && x < 25)
+
+3.
+if(x <= 15 || x > 25)
+
+4.
+I faced no difficulties. Perhaps enabling students with prior knowledge of programming to develop further would be beneficial, instead of having them do the same thing that they did for the first time years ago all over again.

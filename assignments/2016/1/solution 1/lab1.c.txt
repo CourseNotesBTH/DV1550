@@ -1,0 +1,95 @@
+#include <stdio.h>
+
+/*
+	Calls scanf_s and runs getchar() immediately afterwards, effectively removing the problem with
+		scanf(_s) leaving the return key in the buffer. Note, overwrites the original function.
+
+	...			=> take an unkown amount of arguments
+	__VA_ARGS__ => all arguments from ...
+	##			=> optional
+*/
+#define scanf_s(format, ...) scanf_s(format, ## __VA_ARGS__); getchar();
+
+/*
+	Calls fgets and removes the trailing newline usually left from pressing return.
+
+	The trailing newline removal function works by counting characters up until \r or \n.
+	If none are found, it stops at \0 making it resilient to strings lacking trailing newlines as well.
+	Note, overwrites the original function.
+*/
+#define fgets(str, n, stream) fgets(str, n, stream); str[strcspn(str, "\r\n")] = 0;
+
+#define BUFFER_SIZE 50
+
+int main() {
+	int startSticksCount   = 0,
+		currentSticksCount = 0,
+		currentPlayer      = 1;
+
+	char playing = 'y';
+
+	char playerOneName[BUFFER_SIZE],
+		 playerTwoName[BUFFER_SIZE];
+
+	printf("Welcome to \"Stick Game\"\n\n");
+
+	printf("How many sticks are in the pile?\t");
+	scanf_s("%d", &startSticksCount);
+
+	printf("\nPlayer1, what is your name?\t");
+	fgets(playerOneName, BUFFER_SIZE, stdin);
+
+	printf("\nPlayer2, what is your name?\t");
+	fgets(playerTwoName, BUFFER_SIZE, stdin);
+
+	while (playing == 'y') {
+		currentSticksCount = startSticksCount;
+
+		while (currentSticksCount > 1) {
+			printf("\n%d sticks left.\n", currentSticksCount);
+
+			int sticksTaken = 0;
+			do {
+				if (currentPlayer == 1)
+					printf("%s, how many sticks do you wish to take?\t", playerOneName);
+				else
+					printf("%s, how many sticks do you wish to take?\t", playerTwoName);
+
+				scanf_s("%d", &sticksTaken);
+
+				if (!(sticksTaken >= 1 && sticksTaken <= 3))
+					printf("Invalid number!\tPlease try again.\n");
+			} while (!(sticksTaken >= 1 && sticksTaken <= 3));
+			currentSticksCount -= sticksTaken;
+
+			//The current player has lost
+			if (currentSticksCount <= 0) {
+				if (currentPlayer == 1)
+					printf("\n%s, you won the game!\tCongratulations.\n", playerTwoName);
+				else
+					printf("\n%s, you won the game!\tCongratulations.\n", playerOneName);
+			//The current player has won
+			} else if (currentSticksCount == 1) {
+				printf("\nThere is only one stick left!\n");
+				if (currentPlayer == 1)
+					printf("%s, you won the game!\tCongratulations.\n", playerOneName);
+				else
+					printf("%s, you won the game!\tCongratulations.\n", playerTwoName);
+			}
+
+			if (currentPlayer == 1)
+				currentPlayer = 2;
+			else
+				currentPlayer = 1;
+		}
+
+		do {
+			if(!(playing == 'y' || playing == 'n'))
+				printf("Invalid choice!\tPlease try again\n");
+			printf("Do you want to play again (y/n)?\t");
+			scanf_s("%c", &playing);
+		} while (!(playing == 'y' || playing == 'n'));
+	}
+
+	printf("\nGoodbye!");
+}

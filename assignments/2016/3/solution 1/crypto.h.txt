@@ -1,0 +1,66 @@
+#ifndef crypto_h
+#define crypto_h
+
+//free
+#include <stdio.h>
+//strcspn
+#include <string.h>
+//system()
+#include <stdlib.h>
+
+/*
+	Calls scanf and runs getchar() immediately afterwards, effectively removing the problem with
+ scanf(_s) leaving the return key in the buffer. Note, overwrites the original function.
+ 
+	...			=> take an unkown amount of arguments
+	__VA_ARGS__ => all arguments from ...
+	##			=> optional
+ */
+#define scanf(format, ...) scanf(format, ## __VA_ARGS__); getchar();
+
+/*
+	Calls fgets and removes the trailing newline usually left from pressing return.
+ 
+	The trailing newline removal function works by counting characters up until \r or \n.
+	If none are found, it stops at \0 making it resilient to strings lacking trailing newlines as well.
+    Note: not overwritten due to use in a while loop, yielding "expected expression".
+ */
+#define fgets_strip(str, n, stream) fgets(str, n, stream); str[strcspn(str, "\r\n")] = 0;
+
+/*
+    Calls printf as usual and then prints a newline - instead of using \n every time.
+ */
+#define printf_n(format, ...) printf(format, ## __VA_ARGS__); printf("\n");
+
+#define BUFFER_SIZE 256
+
+typedef int bool;
+enum { false, true };
+
+void printMenu();
+
+void clearScreen();
+
+char* handleReadFile(char* fileContents);
+
+void handleSaveFile(char* fileContents);
+
+void handleDisplayFile(char* fileContents);
+
+char* handleEncryptFile(char* fileContents);
+
+char* handleDecryptFile(char* fileContents);
+
+char* encryptText(char *plainText, int arrLength, int key);
+
+char* decryptText(char *cipherText, int arrLength, int key);
+
+char toUpperCase(char charToCapitalise);
+
+char* readFromFile(char fileName[]);
+
+void writeToFile(char fileName[], char text[]);
+
+bool isLetter(char charToCheck);
+
+#endif

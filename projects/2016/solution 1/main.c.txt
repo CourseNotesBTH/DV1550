@@ -1,0 +1,67 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <math.h>
+#include "studentFunctions.h"
+
+int main ()
+{
+    bool shouldRun = true;
+    
+    Image image;
+    
+    generateImage(&image);
+    
+    do {
+        clearScreen();
+        printMenu();
+        
+        int menuChoice = -1;
+        do {
+            printf("Operation: ");
+            scanf("%d", &menuChoice);
+            
+            if(!(menuChoice > 0 && menuChoice <= 9))
+                printf_n("I'm sorry, that option is not available.");
+        } while (!(menuChoice > 0 && menuChoice <= 9));
+        
+        switch(menuChoice){
+            case 1:
+                handleReadImage(&image);
+                break;
+            case 2:
+                handleSaveImage(&image);
+                break;
+            case 3:
+                handleInvertImage(image);
+                break;
+            case 4:
+                handleShiftImage(image);
+                break;
+            case 5:
+                handleFlipImage(&image);
+                break;
+            case 6:
+                handleScaleImage(&image);
+                break;
+            case 7:
+                handleZoomImage(&image);
+                break;
+            case 8:
+                handleCipher(&image);
+                break;
+            case 9:
+                shouldRun = false;
+                break;
+        }
+        
+    } while (shouldRun);
+    
+    for (int i = 0; i < image.height; i++)
+        free(image.pixels[i]);
+    free(image.pixels);
+    
+    clearScreen();
+    printf_n("Thank you for using Photoboutique™ - the \"original\" photo editing solution.");
+
+	return 0;
+}

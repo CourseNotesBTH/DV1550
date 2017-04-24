@@ -1,0 +1,53 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include "crypto.h"
+
+int main(int argc, const char * argv[]) {
+    bool shouldRun = true;
+    
+    char* fileContents = malloc(sizeof(char) * (3));
+    strcpy(fileContents, "-1");
+    
+    do {
+        clearScreen();
+        printMenu();
+        
+        int menuChoice = -1;
+        do {
+            printf("Operation: ");
+            scanf("%d", &menuChoice);
+            
+            if(!(menuChoice > 0 && menuChoice <= 6))
+                printf_n("I'm sorry, that option is not available.");
+        } while (!(menuChoice > 0 && menuChoice <= 6));
+        
+        switch(menuChoice){
+            case 1:
+                fileContents = handleReadFile(fileContents);
+                break;
+            case 2:
+                handleSaveFile(fileContents);
+                break;
+            case 3:
+                handleDisplayFile(fileContents);
+                break;
+            case 4:
+                fileContents = handleEncryptFile(fileContents);
+                break;
+            case 5:
+                fileContents = handleDecryptFile(fileContents);
+                break;
+            case 6:
+                shouldRun = false;
+                break;
+        }
+        
+    } while (shouldRun);
+    
+    free(fileContents);
+    
+    clearScreen();
+    printf_n("Thank you for using Metaspoilt™ - the \"original\" hacker solution.");
+    
+    return 0;
+}

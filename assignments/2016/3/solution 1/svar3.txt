@@ -1,0 +1,9 @@
+1.
+Dynamic linking means that the names of the libraries are placed in the executable, not the actual libraries. This lets multiple programs use a single copy of the libraries.
+
+Static linking is the opposite to dynamic linking, it actual includes the libraries inside of the executable.
+
+2.
+The benefits of dynamic linking are (amongst others): faster compilation time, smaller executable.
+
+The benefits of static linking are (amongst others): embeddable - all needed dependencies can be included in the executable.

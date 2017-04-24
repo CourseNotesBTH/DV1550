@@ -1,0 +1,347 @@
+#include "studentFunctions.h"
+
+void printMenu(){
+    // Print the title - Photoboutique™
+    printf_n("┌─┐┬ ┬┌─┐┌┬┐┌─┐┌┐ ┌─┐┬ ┬┌┬┐┬┌─┐ ┬ ┬┌─┐™\n├─┘├─┤│ │ │ │ │├┴┐│ ││ │ │ ││─┼┐│ │├┤\n┴  ┴ ┴└─┘ ┴ └─┘└─┘└─┘└─┘ ┴ ┴└─┘└└─┘└─┘");
+    printf_n("======================================");
+    printf_n("             input/output");
+    printf_n("1. Read image");
+    printf_n("2. Save image");
+    printf_n("");
+    printf_n("           image operations");
+    printf_n("3. Invert");
+    printf_n("4. Shift");
+    printf_n("5. Flip");
+    printf_n("6. Scale");
+    printf_n("7. Zoom");
+    printf_n("8. Decipher");
+    printf_n("\n9. Exit\n");
+}
+
+/*
+    Use the preprocessor to figure out the current environment,
+    then runs the clear command - makes it a bit more portable.
+    Note: assumes all non-Windows systems use "clear"
+*/
+void clearScreen(){
+#ifdef _WIN32
+    system("cls");
+#else
+    system("clear");
+#endif
+}
+
+void handleReadImage(Image *image){
+    char filename[BUFFER_SIZE];
+    
+    clearScreen();
+    printf_n("======================================");
+    printf_n("              read image\n");
+    
+    printf("What file would you like to read? ");
+    fgets(filename, BUFFER_SIZE, stdin);
+    
+    readImage(filename, image);
+}
+
+void handleSaveImage(Image *image){
+    char filename[BUFFER_SIZE];
+    
+    clearScreen();
+    printf_n("======================================");
+    printf_n("              save image\n");
+    
+    printf("Where would you like to save your file? ");
+    fgets(filename, BUFFER_SIZE, stdin);
+    
+    writeImage(filename, image);
+}
+
+void handleInvertImage(Image image){
+    for(int y = 0; y < image.height; y++)
+    {
+        for(int x = 0; x < image.width; x++)
+        {
+            image.pixels[y][x].r = 255 - image.pixels[y][x].r;
+            image.pixels[y][x].g = 255 - image.pixels[y][x].g;
+            image.pixels[y][x].b = 255 - image.pixels[y][x].b;
+        }
+    }
+}
+
+void handleShiftImage(Image image){
+    for(int y = 0; y < image.height; y++)
+    {
+        for(int x = 0; x < image.width; x++)
+        {
+            uint8_t r = image.pixels[y][x].r,
+                    g = image.pixels[y][x].g,
+                    b = image.pixels[y][x].b;
+            
+            image.pixels[y][x].r = b;
+            image.pixels[y][x].g = r;
+            image.pixels[y][x].b = g;
+        }
+    }
+}
+
+void handleFlipImage(Image* image){
+    Image flippedImage;
+    flippedImage.width = image->height;
+    flippedImage.height = image->width;
+
+    flippedImage.pixels = (Pixel**) malloc(sizeof(Pixel*) * flippedImage.height);
+    for(int y = 0; y < flippedImage.height; y++)
+        flippedImage.pixels[y] = (Pixel*) malloc(sizeof(Pixel) * flippedImage.width);
+    
+    for(int y = 0; y < image->height; y++)
+    {
+        for(int x = 0; x < image->width; x++)
+        {
+            flippedImage.pixels[x][y] = image->pixels[image->height-1-y][image->width-1-x];
+        }
+    }
+    
+    for (int y = 0; y < image->height; y++)
+        free(image->pixels[y]);
+    free(image->pixels);
+    
+    image->pixels = (Pixel**) malloc(sizeof(Pixel*) * flippedImage.height);
+    for(int y = 0; y < flippedImage.height; y++)
+        image->pixels[y] = flippedImage.pixels[y];
+    image->width = flippedImage.width;
+    image->height = flippedImage.height;
+}
+
+void handleScaleImage(Image* image){
+    clearScreen();
+    printf_n("======================================");
+    printf_n("              scale image\n");
+    
+    int factor = -1;
+    do {
+        printf("Factor to scale by: ");
+        scanf("%d", &factor);
+        
+        if(!(factor >= 1))
+            printf_n("I'm sorry, that is an invalid scale factor.");
+    } while (!(factor >= 1));
+    
+    scaleImage(image, factor);
+}
+
+void scaleImage(Image* image, int factor){
+    Image scaledImage;
+    scaledImage.width = image->width * factor;
+    scaledImage.height = image->height * factor;
+    
+    scaledImage.pixels = (Pixel**) malloc(sizeof(Pixel*) * scaledImage.height);
+    for(int y = 0; y < scaledImage.height; y++)
+        scaledImage.pixels[y] = (Pixel*) malloc(sizeof(Pixel) * scaledImage.width);
+    
+    //nearest-neighbor interpolation
+    for(int y = 0; y < image->height; y++)
+    {
+        for(int x = 0; x < image->width; x++)
+        {
+            for(int i = 0; i < factor; i++){
+                for(int j = 0; j < factor; j++){
+                    scaledImage.pixels[(y*factor)+i][(x*factor)+j] = image->pixels[y][x];
+                }
+            }
+        }
+    }
+    
+    for (int y = 0; y < image->height; y++)
+        free(image->pixels[y]);
+    free(image->pixels);
+    
+    image->pixels = (Pixel**) malloc(sizeof(Pixel*) * scaledImage.height);
+    for(int y = 0; y < scaledImage.height; y++)
+        image->pixels[y] = scaledImage.pixels[y];
+    image->width = scaledImage.width;
+    image->height = scaledImage.height;
+    
+    free(scaledImage.pixels);
+}
+
+void handleZoomImage(Image* image){
+    clearScreen();
+    printf_n("======================================");
+    printf_n("               zoom image\n");
+    
+    int factor = -1;
+    do {
+        printf("Factor to zoom by: ");
+        scanf("%d", &factor);
+        
+        if(!(factor >= 1))
+            printf_n("I'm sorry, that is an invalid zoom factor.");
+    } while (!(factor >= 1));
+    
+    Image zoomedImage;
+    zoomedImage.width = image->width / factor;
+    zoomedImage.height = image->height / factor;
+    
+    zoomedImage.pixels = (Pixel**) malloc(sizeof(Pixel*) * zoomedImage.height);
+    for(int y = 0; y < zoomedImage.height; y++)
+        zoomedImage.pixels[y] = (Pixel*) malloc(sizeof(Pixel) * zoomedImage.width);
+    
+    for(int y = 0; y < zoomedImage.height; y++)
+    {
+        for(int x = 0; x < zoomedImage.width; x++)
+        {
+            zoomedImage.pixels[y][x] = image->pixels[(zoomedImage.height / 2)+y][(zoomedImage.width / 2)+x];
+        }
+    }
+    
+    for (int y = 0; y < image->height; y++)
+        free(image->pixels[y]);
+    free(image->pixels);
+    
+    image->pixels = (Pixel**) malloc(sizeof(Pixel*) * zoomedImage.height);
+    for(int y = 0; y < zoomedImage.height; y++)
+        image->pixels[y] = zoomedImage.pixels[y];
+    image->width = zoomedImage.width;
+    image->height = zoomedImage.height;
+    
+    free(zoomedImage.pixels);
+    
+    scaleImage(image, factor);
+}
+
+void handleCipher(Image* cipher){
+    char filename[BUFFER_SIZE];
+    
+    printf("What key file would you like to read? ");
+    fgets(filename, BUFFER_SIZE, stdin);
+    
+    Image key;
+    
+    readImage(filename, &key);
+    
+    for(int y = 0; y < key.height; y++)
+    {
+        for(int x = 0; x < key.width; x++)
+        {
+            int r1 =(int)cipher->pixels[y][x].r,
+                    g1 = (int)cipher->pixels[y][x].g,
+                    b1 = (int)cipher->pixels[y][x].b;
+            
+            int r2 =(int)key.pixels[y][x].r,
+                    g2 = (int)key.pixels[y][x].g,
+                    b2 = (int)key.pixels[y][x].b;
+            
+            
+            int r = 0,
+                g = 0,
+                b = 0;
+
+            /* Bitwise or
+            r = (int)((uint8_t)r1|(uint8_t)r2);
+            g = (int)((uint8_t)g1|(uint8_t)g2);
+            b = (int)((uint8_t)b1|(uint8_t)b2);
+            */
+            
+            //Bitwise xor
+            r = (int)((uint8_t)r1^(uint8_t)r2);
+            g = (int)((uint8_t)g1^(uint8_t)g2);
+            b = (int)((uint8_t)b1^(uint8_t)b2);
+            
+            
+            /* Additive
+             r = r1+r2;
+             g = g1+g2;
+             b = b1+b2;
+             */
+            
+            /* Subtract
+             r = r1-r2;
+             g = g1-g2;
+             b = b1-b2;
+             */
+            
+            /* Difference
+             if(r2 != 0)
+                r = r1/r2;
+             if(g2 != 0)
+                g = g1/g2;
+             if(b2 != 0)
+                b = b1/b2;
+             */
+            
+            
+            if(r < 0)
+                cipher->pixels[y][x].r = 0;
+            else if(r > 255)
+                cipher->pixels[y][x].r = 255;
+            else
+                cipher->pixels[y][x].r = r;
+            
+            if(g < 0)
+                cipher->pixels[y][x].g = 0;
+            else if(g > 255)
+                cipher->pixels[y][x].g = 255;
+            else
+                cipher->pixels[y][x].g = g;
+            
+            if(b < 0)
+                cipher->pixels[y][x].b = 0;
+            else if(b > 255)
+                cipher->pixels[y][x].b = 255;
+            else
+                cipher->pixels[y][x].b = b;
+        }
+    }
+    
+    for (int i = 0; i < key.height; i++)
+        free(key.pixels[i]);
+    free(key.pixels);
+}
+
+void generateImage(Image* image){
+    image->height = 512;
+    image->width = 1024;
+    
+    //Gradient
+    srand(time(NULL));
+    int startR = rand() % (255 + 1),
+        startG = rand() % (255 + 1),
+        startB = rand() % (255 + 1);
+    
+    image->pixels = (Pixel**) malloc(sizeof(Pixel*) * image->height);
+    for(int i = 0; i < image->height; i++)
+    {
+        image->pixels[i] = (Pixel*) malloc(sizeof(Pixel) * image->width);
+        for(int j = 0; j < image->width; j++)
+        {
+            int r = startR-((float)255/image->width * j),
+                g = startG+((float)255/image->width * j),
+                b = startB+((float)255/image->width * i);
+            
+            if(r > 255)
+                r = 255;
+            else if (r < 0)
+                r = 0;
+            
+            if(g > 255)
+                g = 255;
+            else if (g < 0)
+                g = 0;
+            
+            if(g > 255)
+                g = 255;
+            else if (g < 0)
+                g = 0;
+            
+            if(b > 255)
+                b = 255;
+            else if (b < 0)
+                b = 0;
+            
+            image->pixels[i][j].r = r;
+            image->pixels[i][j].g = g;
+            image->pixels[i][j].b = b;
+        }
+    }
+}

@@ -1,0 +1,33 @@
+1.
+call by value:
+int addOne(int a) {
+  return a + 1;
+}
+
+int b = addOne(a);
+
+Data is copied from the calling scope to the function. If the data is modified inside of the function, the result won’t be visible in i.e. the main() function.
+
+call by reference:
+void addOne(int *a) {
+  (*a) += 1;
+}
+
+addOne(a);
+
+A pointer to the data is copied instead of the value. If the value is in any way altered inside of the function, the result will be visible in i.e. the main() function.
+
+2.
+int addOne(int, int);
+
+A declaration only describes the types used. It is used by the compiler to make sure that further use of the identifier is valid.
+
+3.
+int addOne(int a, int b){
+  return a+b;
+}
+
+A definition uses or implements what has already been declared.
+
+4. 
+By using the preprocessor command #ifndef in header files, we can make sure that the file is not included more than once. For example, if the file were to be included multiple times, definitions could be defined more than once, throwing errors, etc.

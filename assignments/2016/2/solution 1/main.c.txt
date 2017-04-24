@@ -1,0 +1,80 @@
+//
+//  main.c
+//  TicTacToe
+//
+//  Created by Alex Gustafsson on 2016-12-07.
+//  Copyright © 2016 Alex Gustafsson. All rights reserved.
+//
+
+#include <stdio.h>
+
+#include "functions.h"
+
+int main(int argc, const char * argv[]) {
+    
+    int currentPlayer = 1;
+    
+    char playing = 'y';
+    
+    char board[3][3];
+    
+    char playerOneName[BUFFER_SIZE],
+    playerTwoName[BUFFER_SIZE];
+    
+    printf_n("Welcome to \"Tic-Tac-Toe\"!");
+    printf_n("---------------------------");
+    printf_n("Who is going to play?");
+    
+    printf("Player1, state your name: ");
+    fgets(playerOneName, BUFFER_SIZE, stdin);
+    
+    printf("Player2, state your name: ");
+    fgets(playerTwoName, BUFFER_SIZE, stdin);
+    
+    while (playing == 'y') {
+        initializeGame(board);
+        
+        int placeChosen = -1;
+        
+        do {
+            
+            printGame(board);
+            
+            do {
+                if (currentPlayer == 1)
+                    printf("%s, in what square do you choose to put your X? ", playerOneName);
+                else
+                    printf("%s, in what square do you choose to put your O? ", playerTwoName);
+                
+                scanf("%d", &placeChosen);
+            } while (!isAvailable(board, placeChosen));
+            
+            place(board, placeChosen, currentPlayer);
+            
+            if (currentPlayer == 1)
+                currentPlayer = 2;
+            else
+                currentPlayer = 1;
+        } while(!isWinner(board) && !isFull(board));
+        
+        printGame(board);
+        
+        if(isFull(board)){
+            printf_n("Game Over");
+        } else {
+            printf_n("Game winner is %s!", currentPlayer == 1 ? playerTwoName : playerOneName);
+        }
+        
+        
+        do {
+            if(!(playing == 'y' || playing == 'n'))
+                printf("Invalid choice!\tPlease try again\n");
+            printf("Do you want to play again (y/n)? ");
+            scanf("%c", &playing);
+        } while (!(playing == 'y' || playing == 'n'));
+    }
+    
+    printf("\nGoodbye!");
+    
+    return 0;
+}
