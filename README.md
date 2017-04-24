@@ -1,4 +1,6 @@
-<center>![Logo](./logo.png "Logo")</center>
+<p align="center">
+  <img alt="Logo" src="https://github.com/ProgrammingCoursesBTH/C_DV1550/raw/master/logo.png">
+</p>
 
 DV1550 - Introduction To C
 ======
