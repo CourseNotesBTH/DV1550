@@ -12,7 +12,7 @@ Examples and assignments for DV1550 - Introduction To C
 # Quickstart
 <a name="quickstart"></a>
 
-Each folder in this repository holds a PDF file explaining the assignment. If there are help files present, these will be in "helpFiles.zip". Each folder within the assignment folder is a solution to the assignment, contributed by a student.
+Each folder in this repository holds a PDF file explaining the assignment. If there are help files present, these will be in "helpfiles.zip". Each folder within the assignment folder is a solution to the assignment, contributed by a student.
 
 ```
 C_DV1550:
