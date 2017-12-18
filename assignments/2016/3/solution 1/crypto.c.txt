@@ -1,0 +1,216 @@
+#include "crypto.h"
+
+void printMenu(){
+    // Print the title - Metaspoilt™
+    printf_n("     ┌┬┐┌─┐┌┬┐┌─┐┌─┐┌─┐┌─┐┬┬ ┌┬┐™\n     │││├┤  │ ├─┤└─┐├─┘│ │││  │\n     ┴ ┴└─┘ ┴ ┴ ┴└─┘┴  └─┘┴┴─┘┴");
+    printf_n("======================================");
+    printf_n("             input/output");
+    printf_n("1. Read file");
+    printf_n("2. Save file");
+    printf_n("3. Display file contents");
+    printf_n("");
+    printf_n("           crypto operations");
+    printf_n("4. Encrypt");
+    printf_n("5. Decrypt");
+    printf_n("\n6. Exit\n");
+}
+
+/*
+    Use the preprocessor to figure out the current environment,
+    then runs the clear command - makes it a bit more portable.
+    Note: assumes all non-Windows systems use "clear"
+*/
+void clearScreen(){
+#ifdef _WIN32
+    system("cls");
+#else
+    system("clear");
+#endif
+}
+
+void handleDisplayFile(char* fileContents){
+    clearScreen();
+    printf_n("======================================");
+    printf_n("           file contents\n");
+    printf_n("%s", fileContents);
+    printf("Press Enter to continue...");
+    getchar();
+}
+
+char* handleReadFile(char* fileContents){
+    char filename[BUFFER_SIZE];
+    
+    clearScreen();
+    printf_n("======================================");
+    printf_n("               read file\n");
+    
+    
+    printf("What file would you like to read? ");
+    fgets_strip(filename, BUFFER_SIZE, stdin);
+    
+    free(fileContents);
+    return readFromFile(filename);
+}
+
+void handleSaveFile(char* fileContents){
+    char filename[BUFFER_SIZE];
+    
+    clearScreen();
+    printf_n("======================================");
+    printf_n("               save file\n");
+    
+    printf("Where would you like to save your file? ");
+    fgets_strip(filename, BUFFER_SIZE, stdin);
+    
+    writeToFile(filename, fileContents);
+}
+
+char* handleEncryptFile(char* fileContents){
+    int key;
+    
+    clearScreen();
+    printf_n("======================================");
+    printf_n("            encrypt file\n");
+    
+    printf("What key would you like to use? ");
+    scanf("%d", &key);
+    
+    return encryptText(fileContents, (int)strlen(fileContents), key);
+}
+
+char* handleDecryptFile(char* fileContents){
+    int key;
+    
+    clearScreen();
+    printf_n("======================================");
+    printf_n("            decrypt file\n");
+    
+    printf("What key would you like to use? ");
+    scanf("%d", &key);
+    
+    return decryptText(fileContents, (int)strlen(fileContents), key);
+}
+
+char* encryptText(char *plainText, int arrLength, int key){
+    bool outOfRange = !(key >= 1 && key <= 25);
+    char* fileContents = malloc(sizeof(char) * (3));
+    strcpy(fileContents, "-1\0");
+    
+    if(!outOfRange){
+        free(fileContents);
+        //strlen doesn't include \0, compensate for it
+        fileContents = malloc(sizeof(char) * (arrLength + 1));
+        
+        for(int i = 0; i < arrLength; i++){
+            char charToMove = toUpperCase(plainText[i]);
+            if(isLetter(charToMove)){
+                int asciiIndex = (int)charToMove;
+                
+                if(asciiIndex + key > 90)
+                    asciiIndex = asciiIndex + key - 90 + 64;
+                else
+                    asciiIndex += key;
+                
+                fileContents[i] = (char)asciiIndex;
+            } else {
+                fileContents[i] = charToMove;
+            }
+        }
+        
+        fileContents[arrLength + 1] = '\0';
+    }
+    
+    free(plainText);
+    
+    return fileContents;
+}
+
+char* decryptText(char *cipherText, int arrLength, int key){
+    bool outOfRange = !(key >= 1 && key <= 25);
+    char* fileContents = malloc(sizeof(char) * (3));
+    strcpy(fileContents, "-1\0");
+    
+    if(!outOfRange){
+        free(fileContents);
+        //strlen doesn't include \0, compensate for it
+        fileContents = malloc(sizeof(char) * (arrLength + 1));
+        
+        for(int i = 0; i < arrLength; i++){
+            char charToMove = toUpperCase(cipherText[i]);
+            if(isLetter(charToMove)){
+                int asciiIndex = (int)charToMove;
+                
+                if(asciiIndex - key < 65)
+                    asciiIndex = 90 - (65 - (asciiIndex - key + 1));
+                else
+                    asciiIndex -= key;
+                
+                fileContents[i] = (char)asciiIndex;
+            } else {
+                fileContents[i] = charToMove;
+            }
+        }
+    
+        fileContents[arrLength + 1] = '\0';
+    }
+    
+    free(cipherText);
+    
+    return fileContents;
+}
+
+char toUpperCase(char charToCapitalise){
+    //65-90: uppercase, 97-122: lowercase
+    bool lowerCase = (int) charToCapitalise >= 97 && (int) charToCapitalise <= 122;
+
+    return lowerCase ? (char)((int)charToCapitalise - 32) : charToCapitalise;
+}
+
+bool isLetter(char charToCheck){
+    //65-90: uppercase, 97-122: lowercase
+    return ((int) charToCheck >= 65 && (int) charToCheck <= 90) || ((int) charToCheck >= 97 && (int) charToCheck <= 122);
+}
+
+char* readFromFile(char fileName[]){
+    FILE *fileHandle = fopen(fileName, "r");
+    char* buffer;
+    int fileSize,
+        sizeRead;
+    
+    if (fileHandle) {
+        // Go to end of file
+        fseek(fileHandle, 0, SEEK_END);
+        // Get index of byte (the file size)
+        fileSize = (int)ftell(fileHandle);
+        // Start all over again
+        rewind(fileHandle);
+        // Allocate enough memory for the file's contents + 1 for \0
+        buffer = (char*) malloc(sizeof(char) * (fileSize + 1) );
+        // Get the size of the read data as it is being read
+        sizeRead = (int)fread(buffer, sizeof(char), fileSize, fileHandle);
+        // Set the end of the string
+        buffer[fileSize] = '\0';
+        
+        // If all of the file wasn't read or expected size didn't match actual size
+        if (fileSize != sizeRead)
+        {
+            free(buffer);
+            buffer = NULL;
+        }
+        
+        fclose(fileHandle);
+    }
+    
+    return buffer;
+}
+
+void writeToFile(char fileName[], char text[]){
+    FILE *fileHandle = fopen(fileName, "w");
+    if (fileHandle){
+        fprintf(fileHandle, "%s", text);
+        fclose(fileHandle);
+    }
+}
+
+
+
