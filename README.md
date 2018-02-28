@@ -7,7 +7,8 @@ DV1550 - Introduction To C
 
 Examples and assignments for DV1550 - Introduction To C
 
-[More courses](https://github.com/ProgrammingCoursesBTH)
+[More courses](https://github.com/ProgrammingCoursesBTH) <br />
+See also [Course Notes at BTH](https://github.com/CourseNotesBTH)
 
 # Quickstart
 <a name="quickstart"></a>
